@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-space-grotesk);
+
+  /* SportSphere Aesthetic */
+  --color-alokai-green: #00f584;
+  /* Approximate based on previous context */
+  --color-cosmic-black: #05130b;
+}
+
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Restoration of cosmic-black class for CosmicBackground.tsx */
+  .bg-cosmic-black {
+    background-color: #05130b;
+  }
+}
+
+body {
+  background: #000000;
+  color: #ffffff;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
