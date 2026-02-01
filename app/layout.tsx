@@ -23,8 +23,13 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Sportsphere | The Future of Sports Management",
-  description: "AI-native platform for modern sports clubs.",
+  title: "Coach Voice",
+  description: "Coach Voice helps you slow down, listen back, and understand what truly happens in your sessions.",
+  openGraph: {
+    title: "Coach Voice",
+    description: "Coach Voice helps you slow down, listen back, and understand what truly happens in your sessions.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
