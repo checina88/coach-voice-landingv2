@@ -31,10 +31,9 @@ const Navbar = () => {
                     <a href="#" className="hover:text-cv-text-primary transition-colors">About Us</a>
                     <a href="#" className="hover:text-cv-text-primary transition-colors">Features</a>
                     <a href="#" className="hover:text-cv-text-primary transition-colors">How it works</a>
-                    <a href="#" className="hover:text-cv-text-primary transition-colors">Book</a>
 
-                    <button className="px-5 py-2 rounded-full bg-white/50 hover:bg-white/80 border border-white/20 text-cv-text-primary transition-all shadow-sm hover:shadow">
-                        Make a call
+                    <button className="px-5 py-2 rounded-full bg-cv-accent hover:bg-cv-teal-hover text-white transition-all shadow-md hover:shadow-lg">
+                        Take Action
                     </button>
                 </div>
             </div>

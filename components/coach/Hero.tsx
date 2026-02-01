@@ -27,7 +27,7 @@ const Hero = () => {
                 <div className="fade-in-up" style={{ animationDelay: '0.4s' }}>
                     <button className="group relative bg-cv-accent hover:bg-cv-teal-hover transition-all duration-500 ease-out rounded-2xl p-8 text-left shadow-2xl hover:shadow-3xl hover:-translate-y-1 w-full max-w-sm">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-xl md:text-2xl font-medium text-white">Make a call</span>
+                            <span className="text-xl md:text-2xl font-medium text-white">Take Action</span>
                             <ArrowRight className="text-white/80 w-6 h-6 group-hover:translate-x-1 transition-transform" />
                         </div>
                         <p className="text-white/80 text-sm md:text-base font-light">
