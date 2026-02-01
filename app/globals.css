@@ -4,26 +4,69 @@
   --font-sans: var(--font-inter);
   --font-mono: var(--font-space-grotesk);
 
-  /* SportSphere Aesthetic */
-  --color-alokai-green: #00f584;
-  /* Approximate based on previous context */
-  --color-cosmic-black: #05130b;
+  /* Coach Voice Strict Palette */
+  --color-cv-bg-top: #e0e0e0;
+  --color-cv-bg-transition: #d1e7e3;
+  --color-cv-bg-mid: #a0d4c1;
+  --color-cv-gradient-bottom: #3f857e;
+  /* Requested name */
+
+  --color-cv-text-primary: #1a1d21;
+  --color-cv-text-secondary: #475569;
+
+  /* Status/Feedback Colors (if needed, keeping consistent with request) */
+  --color-cv-accent: #3f857e;
+  --color-cv-teal-hover: #2d6660;
 }
 
+/* Custom Utilities for Glass and Layout */
 @layer utilities {
+  .bg-glass {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  }
+
+  .bg-glass-heavy {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
   .text-shadow-sm {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
-  /* Restoration of cosmic-black class for CosmicBackground.tsx */
-  .bg-cosmic-black {
-    background-color: #05130b;
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Robust class that guarantees initial state is hidden */
+  .fade-in-up {
+    opacity: 0;
+    /* Start hidden */
+    animation: fadeInUp 0.8s ease-out forwards;
   }
 }
 
 body {
-  background: #000000;
-  color: #ffffff;
+  background: linear-gradient(180deg,
+      var(--color-cv-bg-top) 0%,
+      var(--color-cv-bg-transition) 25%,
+      var(--color-cv-bg-mid) 60%,
+      var(--color-cv-gradient-bottom) 100%);
+  color: var(--color-cv-text-primary);
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;

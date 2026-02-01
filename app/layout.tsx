@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} ${caveat.variable} ${playfair.variable} antialiased bg-cosmic-black text-white`}
+        className={`${inter.variable} ${spaceGrotesk.variable} ${caveat.variable} ${playfair.variable} antialiased`}
       >
         {children}
       </body>

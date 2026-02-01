@@ -19,13 +19,13 @@ const Hero = () => {
 
             {/* Main Content */}
             <div className="flex flex-col items-center max-w-4xl pt-24 md:pt-0">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight leading-[1.1] mb-12 text-cv-text-primary animate-fade-in opacity-0" style={{ animationDelay: '0.2s' }}>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight leading-[1.1] mb-12 text-cv-text-primary fade-in-up" style={{ animationDelay: '0.2s' }}>
                     Coach Voice helps you slow down, listen back, and understand what truly happens in your sessions.
                 </h1>
 
                 {/* CTA Card */}
-                <div className="animate-fade-in opacity-0" style={{ animationDelay: '0.4s' }}>
-                    <button className="group relative bg-[#3f857e] hover:bg-[#2d6660] transition-all duration-500 ease-out rounded-xl p-8 text-left shadow-lg hover:shadow-xl hover:-translate-y-1 w-full max-w-sm">
+                <div className="fade-in-up" style={{ animationDelay: '0.4s' }}>
+                    <button className="group relative bg-cv-accent hover:bg-cv-teal-hover transition-all duration-500 ease-out rounded-2xl p-8 text-left shadow-2xl hover:shadow-3xl hover:-translate-y-1 w-full max-w-sm">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xl md:text-2xl font-medium text-white">Make a call</span>
                             <ArrowRight className="text-white/80 w-6 h-6 group-hover:translate-x-1 transition-transform" />

@@ -28,7 +28,7 @@ const FeedbackDomains = () => {
                             <div className="flex-1 w-full h-2 bg-black/5 rounded-full relative overflow-hidden">
                                 <div
                                     className="absolute top-0 bottom-0 w-2 h-2 bg-cv-text-primary rounded-full shadow-sm m-auto mt-[0px]"
-                                    style={{ left: `${domain.value}%`, transform: 'translateX(-50%)', height: '100%', width: '12px', background: '#3f857e' }}
+                                    style={{ left: `${domain.value}%`, transform: 'translateX(-50%)', height: '100%', width: '12px', background: 'var(--color-cv-accent)' }}
                                 />
                             </div>
                             <span className="w-1/3 text-left hidden md:block">{domain.right}</span>

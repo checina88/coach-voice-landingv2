@@ -125,7 +125,7 @@ const FoggyCard = ({ card, index, containerRef }: { card: any, index: number, co
     return (
         <div
             ref={cardRef}
-            className="flex-shrink-0 w-[85vw] md:w-[400px] h-[320px] snap-center glass-panel-calm rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 ease-out hover:bg-white/40 border border-white/30"
+            className="flex-shrink-0 w-[85vw] md:w-[400px] h-[320px] snap-center bg-glass rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 ease-out hover:bg-glass-heavy"
             style={{
                 opacity: opacity,
                 filter: `blur(${blur}px)`,
