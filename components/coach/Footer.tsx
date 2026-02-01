@@ -9,14 +9,15 @@ const Footer = () => {
                     &copy; {new Date().getFullYear()} Coach Voice. All rights reserved.
                 </div>
 
-                <a href="#" className="hover:text-white transition-colors">Contact</a>
-                <a href="#" className="hover:text-white transition-colors">FAQ</a>
-                <a href="#" className="hover:text-white transition-colors">About / Methodology</a>
-                <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                <a href="#" className="hover:text-white transition-colors">Terms</a>
-                <a href="#" className="hover:text-white transition-colors">Legal / Imprint</a>
+                <div className="flex flex-wrap justify-center gap-6 text-sm text-white/60 font-light">
+                    <a href="#" className="hover:text-white transition-colors">Contact</a>
+                    <a href="#" className="hover:text-white transition-colors">FAQ</a>
+                    <a href="#" className="hover:text-white transition-colors">About / Methodology</a>
+                    <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" className="hover:text-white transition-colors">Terms</a>
+                    <a href="#" className="hover:text-white transition-colors">Legal / Imprint</a>
+                </div>
             </div>
-        </div>
         </footer >
     );
 };
