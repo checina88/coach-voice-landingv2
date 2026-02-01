@@ -137,19 +137,22 @@ const FoggyCard = ({ card, index, containerRef }: { card: any, index: number, co
         const maxDist = containerRect.width / 2; // Roughly half screen width
         const normalized = Math.min(distance / maxDist, 1); // 0 (center) to 1 (edge)
 
-        // Depth Logic:
+        // Depth Logic (User Spec):
         // Center: Scale 1, Blur 0, Opacity 1
         // Edge: Scale 0.75, Blur 6px, Opacity 0.4
+        // Circular illusion: Cards shrink and disappear "behind" on exit.
 
-        const scale = 1 - (normalized * 0.25);
-        const blur = normalized * 6;
-        const opacity = 1 - (normalized * 0.6);
-        const zIndex = Math.round((1 - normalized) * 100); // Higher z-index for center
+        const scale = 1 - (normalized * 0.25); // 1 -> 0.75
+        const blur = normalized * 6;           // 0 -> 6px
+        const opacity = 1 - (normalized * 0.6); // 1 -> 0.4
+
+        // Z-index layer: Center is highest, edges drop back
+        const zIndex = Math.round((1 - normalized) * 100);
 
         setStyle({
             opacity,
             filter: `blur(${blur}px)`,
-            transform: `scale(${scale})`,
+            transform: `scale(${scale})`, // Just scale, no 3D rotate to keep it "calm" but "deep"
             zIndex
         });
     }, [containerRef]);
