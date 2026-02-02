@@ -58,6 +58,18 @@
     /* Start hidden */
     animation: fadeInUp 0.8s ease-out forwards;
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari and Opera */
+  }
 }
 
 body {

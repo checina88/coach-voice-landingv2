@@ -14,10 +14,10 @@ const Hero = () => {
                     </h1>
 
                     <div className="flex flex-col items-start gap-4 fade-in-up" style={{ animationDelay: '0.3s' }}>
-                        <button className="px-8 py-3 bg-cv-accent hover:bg-cv-teal-hover text-white text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 group">
+                        <a href="/book" className="px-8 py-3 bg-cv-accent hover:bg-cv-teal-hover text-white text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 group">
                             Take Action
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </button>
+                        </a>
                         <p className="text-sm text-cv-text-secondary/80 font-light">
                             A private conversation to understand your coaching environment.
                         </p>

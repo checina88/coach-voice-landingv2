@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 
-const originalCards = [
+const cards = [
     {
         id: 1,
         title: "Set an intention",
@@ -41,56 +40,68 @@ const originalCards = [
     }
 ];
 
-// Triplicate the array for infinite illusion
-const infiniteCards = [...originalCards, ...originalCards, ...originalCards];
-
 const SlowDown = () => {
-    const containerRef = useRef<HTMLDivElement>(null);
+    const scrollDriverRef = useRef<HTMLDivElement>(null);
+    const [rotation, setRotation] = useState(0);
+    const [isInteracting, setIsInteracting] = useState(false);
 
-    // Initial scroll positioning and infinite loop logic
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
+    // Params for the 3D wheel
+    const RADIUS = 800; // Increased radius for flatter, less curved look
+    const VISIBLE_ARC = 100; // Degrees of the circle visible at once
 
-        const handleInfiniteScroll = () => {
-            if (!container) return;
+    // Handle scroll to rotation mapping
+    const handleScroll = useCallback(() => {
+        if (!scrollDriverRef.current) return;
+        const scrollLeft = scrollDriverRef.current.scrollLeft;
+        const maxScroll = scrollDriverRef.current.scrollWidth - scrollDriverRef.current.clientWidth;
 
-            const maxScrollLeft = container.scrollWidth - container.clientWidth;
-            const oneSetWidth = container.scrollWidth / 3;
+        // Map scroll to total rotation (allows multiple loops if we want, or just one big one)
+        // Let's make it infinite scroll feel by managing the scroll position reset
 
-            // If scrolled near the START (left), jump forward to middle set
-            if (container.scrollLeft < 50) {
-                container.scrollLeft += oneSetWidth;
-            }
-            // If scrolled near the END (right), jump backward to middle set
-            else if (container.scrollLeft > maxScrollLeft - 50) {
-                container.scrollLeft -= oneSetWidth;
-            }
-        };
+        // Simple mapping first: 1px = 0.1 degree
+        const newRotation = scrollLeft * 0.05;
+        setRotation(newRotation);
+        setIsInteracting(true);
 
-        container.addEventListener('scroll', handleInfiniteScroll);
-
-        // Start in the middle set
-        // Need a slight delay or layout readiness for accurate scrollWidth
-        const initScroll = () => {
-            const oneSetWidth = container.scrollWidth / 3;
-            // Center the middle set roughly
-            container.scrollLeft = oneSetWidth + (oneSetWidth / 2) - (container.clientWidth / 2);
-        };
-
-        // Try immediately and slightly after layout
-        initScroll();
-        setTimeout(initScroll, 100);
-
-        return () => container.removeEventListener('scroll', handleInfiniteScroll);
+        // Reset interaction flag after a delay to resume auto-rotation if we had one (optional, user didn't ask for auto-play but it's nice)
+        // For now, stick to user control only as requested ("Interaction feels native and intentional")
     }, []);
 
+    // Infinite scroll loop logic (reset scroll position when reaching ends)
+    useEffect(() => {
+        const driver = scrollDriverRef.current;
+        if (!driver) return;
+
+        const checkInfinite = () => {
+            if (driver.scrollLeft <= 100) {
+                // Too far left, jump to middle
+                driver.scrollLeft = 5000;
+            } else if (driver.scrollLeft >= driver.scrollWidth - 500) {
+                // Too far right, jump to middle
+                driver.scrollLeft = 5000;
+            }
+        };
+
+        // Initialize in middle
+        driver.scrollLeft = 5000;
+
+        driver.addEventListener('scroll', checkInfinite);
+        return () => driver.removeEventListener('scroll', checkInfinite);
+    }, []);
+
+    useEffect(() => {
+        const driver = scrollDriverRef.current;
+        if (!driver) return;
+        driver.addEventListener('scroll', handleScroll);
+        return () => driver.removeEventListener('scroll', handleScroll);
+    }, [handleScroll]);
+
     return (
-        <section className="w-full py-24 flex flex-col justify-center overflow-hidden">
+        <section className="w-full py-32 flex flex-col justify-center overflow-hidden relative bg-[#e0e0e0]/20">
             {/* Title Section */}
-            <div className="px-6 md:px-12 lg:px-24 mb-16 text-center">
-                <div className="max-w-2xl mx-auto fade-in-up" style={{ animationDelay: '0.6s' }}>
-                    <h2 className="text-3xl md:text-4xl font-light mb-6 text-cv-text-primary">
+            <div className="px-6 md:px-12 lg:px-24 mb-24 text-center relative z-10">
+                <div className="max-w-2xl mx-auto fade-in-up" style={{ animationDelay: '0.2s' }}>
+                    <h2 className="text-3xl md:text-5xl font-light mb-6 text-cv-text-primary tracking-tight">
                         Slow down
                     </h2>
                     <p className="text-xl md:text-2xl text-cv-text-secondary font-light leading-relaxed">
@@ -99,103 +110,84 @@ const SlowDown = () => {
                 </div>
             </div>
 
-            {/* Circular Carousel Track */}
+            {/* 3D Scene Container */}
+            <div className="relative w-full h-[500px] perspective-[2000px] flex items-center justify-center">
+
+                {/* Visual Wheel (Fixed Center) */}
+                <div className="relative w-full h-full flex items-center justify-center transform-style-3d">
+                    {cards.map((card, index) => {
+                        // Calculate position on the wheel
+                        // We want equal spacing. 360 / cards.
+                        const cardAngleOffset = (360 / cards.length) * index;
+
+                        // Current angle including global rotation
+                        // We subtract rotation to make it feel like scrolling right moves wheel left (standard)
+                        let rawAngle = cardAngleOffset - rotation;
+
+                        // Normalize angle to -180 to 180 for easier depth logic
+                        const normalizedAngle = ((rawAngle % 360) + 540) % 360 - 180;
+
+                        // Calculate Depth (Z) and Lateral (X)
+                        // Standard circle math:
+                        // x = r * sin(a)
+                        // z = r * cos(a)
+                        const rad = (normalizedAngle * Math.PI) / 180;
+                        const x = RADIUS * Math.sin(rad);
+                        const z = RADIUS * Math.cos(rad) - RADIUS; // curve back from 0
+
+                        // Visibility/masking logic based on angle (back of wheel)
+                        const isBack = Math.abs(normalizedAngle) > 90;
+
+                        // Dynamic styles
+                        const scale = 1 + (z / (RADIUS * 1.5)); // Shrink as it goes back
+                        const opacity = Math.max(0, 1 + (z / (RADIUS * 0.8))); // Fade out in back
+                        const blur = Math.abs(normalizedAngle) * 0.1; // Blur as angle increases (edges)
+
+                        // Hide items that are too far back to prevent artifacting/clutter
+                        const isVisible = opacity > 0.05;
+
+                        return (
+                            <div
+                                key={card.id}
+                                className="absolute top-1/2 left-1/2 w-[340px] md:w-[400px] -ml-[170px] md:-ml-[200px] -mt-[160px] transition-transform duration-75 ease-out"
+                                style={{
+                                    transform: `translate3d(${x}px, 0, ${z}px) scale(${scale})`,
+                                    zIndex: Math.round(scale * 100),
+                                    opacity: opacity,
+                                    filter: `blur(${blur}px)`,
+                                    visibility: isVisible ? 'visible' : 'hidden',
+                                }}
+                            >
+                                <div className="w-full h-[320px] bg-white/40 backdrop-blur-xl border border-white/40 rounded-3xl p-8 flex flex-col justify-between shadow-2xl hover:bg-white/50 transition-colors duration-300">
+                                    <div className="flex justify-between items-start">
+                                        <span className="text-4xl font-light text-[#1a1d21]/20">{String(card.id).padStart(2, '0')}</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-normal text-[#1a1d21] mb-3">{card.title}</h3>
+                                        <p className="text-[#475569] font-light leading-relaxed">{card.description}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Scroll Driver (Invisible, handles interaction) */}
+            {/* Extremely wide to allow for long scrolling without hitting edges immediately */}
             <div
-                ref={containerRef}
-                className="flex overflow-x-auto gap-12 px-[50vw] pb-16 pt-12 snap-x snap-mandatory scrollbar-hide items-center w-full"
-                style={{
-                    scrollBehavior: 'auto', // disable smooth scroll for the instant jump to work invisible
-                    perspective: '1000px' // Add perspective for 3D feel if we want
-                }}
+                ref={scrollDriverRef}
+                className="absolute inset-0 overflow-x-auto scrollbar-hide z-50 cursor-grab active:cursor-grabbing"
+                style={{ scrollBehavior: 'auto' }}
             >
-                {infiniteCards.map((card, index) => (
-                    // Using index as key is necessary here because IDs are duplicated
-                    <FoggyCard key={`${card.id}-${index}`} card={card} index={index + 1} containerRef={containerRef} />
-                ))}
+                <div className="w-[10000vw] h-full pointer-events-none" />
+            </div>
+
+            <div className="w-full flex justify-center mt-8 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
+                Scroll / Swipe to explore
             </div>
         </section>
     );
 };
-
-const FoggyCard = ({ card, index, containerRef }: { card: any, index: number, containerRef: React.RefObject<HTMLDivElement | null> }) => {
-    const cardRef = useRef<HTMLDivElement>(null);
-    const [style, setStyle] = useState({ opacity: 0.5, filter: 'blur(4px)', transform: 'scale(0.8)', zIndex: 1 });
-
-    const updateStyle = useCallback(() => {
-        if (!containerRef.current || !cardRef.current) return;
-
-        const container = containerRef.current;
-        const cardEl = cardRef.current;
-        const containerRect = container.getBoundingClientRect();
-        const cardRect = cardEl.getBoundingClientRect();
-
-        const containerCenter = containerRect.left + containerRect.width / 2;
-        const cardCenter = cardRect.left + cardRect.width / 2;
-        const distance = Math.abs(containerCenter - cardCenter);
-
-        // Distance at which card becomes fully "background"
-        const maxDist = containerRect.width / 2; // Roughly half screen width
-        const normalized = Math.min(distance / maxDist, 1); // 0 (center) to 1 (edge)
-
-        // Depth Logic (User Spec):
-        // Center: Scale 1, Blur 0, Opacity 1
-        // Edge: Scale 0.75, Blur 6px, Opacity 0.4
-        // Circular illusion: Cards shrink and disappear "behind" on exit.
-
-        const scale = 1 - (normalized * 0.25); // 1 -> 0.75
-        const blur = normalized * 6;           // 0 -> 6px
-        const opacity = 1 - (normalized * 0.6); // 1 -> 0.4
-
-        // Z-index layer: Center is highest, edges drop back
-        const zIndex = Math.round((1 - normalized) * 100);
-
-        setStyle({
-            opacity,
-            filter: `blur(${blur}px)`,
-            transform: `scale(${scale})`, // Just scale, no 3D rotate to keep it "calm" but "deep"
-            zIndex
-        });
-    }, [containerRef]);
-
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-
-        const onScroll = () => requestAnimationFrame(updateStyle);
-
-        container.addEventListener('scroll', onScroll);
-        window.addEventListener('resize', onScroll);
-
-        // Initial calc
-        updateStyle();
-
-        return () => {
-            container.removeEventListener('scroll', onScroll);
-            window.removeEventListener('resize', onScroll);
-        };
-    }, [containerRef, updateStyle]);
-
-    return (
-        <div
-            ref={cardRef}
-            className="flex-shrink-0 w-[80vw] md:w-[400px] h-[320px] snap-center bg-glass rounded-2xl p-8 flex flex-col justify-between transition-all duration-75 ease-out hover:bg-glass-heavy shadow-lg"
-            style={{
-                opacity: style.opacity,
-                filter: style.filter,
-                transform: style.transform,
-                zIndex: style.zIndex,
-                willChange: 'opacity, filter, transform'
-            }}
-        >
-            <div className="flex justify-between items-start">
-                <span className="text-4xl font-light text-cv-text-secondary/30">{String(card.id).padStart(2, '0')}</span>
-            </div>
-            <div>
-                <h3 className="text-2xl font-normal text-cv-text-primary mb-3">{card.title}</h3>
-                <p className="text-cv-text-secondary font-light leading-relaxed">{card.description}</p>
-            </div>
-        </div>
-    )
-}
 
 export default SlowDown;
