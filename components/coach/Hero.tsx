@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import InsightSystem from './InsightSystem';
+import HeroAnimationCard from './HeroAnimationCard';
 
 const Hero = () => {
     return (
@@ -24,12 +24,9 @@ const Hero = () => {
                     </div>
                 </div>
 
-                {/* RIGHT SIDE: Technological Insight System */}
+                {/* RIGHT SIDE: Animation Card */}
                 <div className="flex items-center justify-center relative fade-in-up" style={{ animationDelay: '0.4s' }}>
-                    <InsightSystem />
-
-                    {/* Background Glow for visual depth (optional) */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-cv-accent/5 blur-[100px] rounded-full pointer-events-none" />
+                    <HeroAnimationCard />
                 </div>
 
             </div>
