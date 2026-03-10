@@ -17,7 +17,7 @@ const FeedbackDomains = () => {
     return (
         <section className="w-full py-24 px-6 md:px-12 lg:px-24 flex flex-col items-center">
             <div className="max-w-3xl w-full">
-                <h2 className="text-2xl md:text-3xl font-light text-cv-text-primary mb-16 text-center">
+                <h2 className="text-2xl md:text-3xl font-serif font-light text-cv-text-primary mb-16 text-center">
                     Explore the feedback from your coaching sessions.
                 </h2>
 

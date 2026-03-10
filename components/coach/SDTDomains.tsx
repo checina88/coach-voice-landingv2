@@ -6,7 +6,7 @@ const SDTDomains = () => {
         <section className="w-full py-24 px-6 md:px-12 lg:px-24">
             <div className="max-w-6xl mx-auto">
                 <div className="mb-16 text-center md:text-left">
-                    <h2 className="text-3xl md:text-4xl font-light text-white mb-4">SDT domains</h2>
+                    <h2 className="text-3xl md:text-4xl font-serif font-light text-white mb-4">SDT domains</h2>
                     <p className="text-xl text-white/80 font-light">How Self-Determination Theory translates into your conversations.</p>
                 </div>
 

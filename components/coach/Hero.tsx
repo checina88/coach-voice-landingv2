@@ -4,7 +4,7 @@ import HeroAnimationCard from './HeroAnimationCard';
 
 const Hero = () => {
     return (
-        <section className="relative w-full min-h-screen flex items-center justify-center px-6 md:px-12 lg:px-24 pt-24 md:pt-0 overflow-hidden">
+        <section className="relative w-full min-h-screen flex items-center justify-center px-6 md:px-12 lg:px-24 pt-20 overflow-hidden">
             <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
                 {/* LEFT SIDE: Message & Invitation */}
