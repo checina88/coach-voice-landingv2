@@ -2,6 +2,62 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 
+/* ── Inline SVG Icons (thin stroke, monochrome) ── */
+const CompassIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88" />
+    </svg>
+);
+
+const MicrophoneIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="22" />
+    </svg>
+);
+
+const CloudUploadIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+        <path d="M12 12v9" />
+        <path d="m16 16-4-4-4 4" />
+    </svg>
+);
+
+const PauseIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="10" y1="15" x2="10" y2="9" />
+        <line x1="14" y1="15" x2="14" y2="9" />
+    </svg>
+);
+
+const ChartIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 3v18h18" />
+        <path d="m19 9-5 5-4-4-3 3" />
+    </svg>
+);
+
+const LightbulbIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+        <path d="M9 18h6" />
+        <path d="M10 22h4" />
+    </svg>
+);
+
+const PathArrowIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14" />
+        <path d="m12 5 7 7-7 7" />
+    </svg>
+);
+
+const cardIcons = [CompassIcon, MicrophoneIcon, CloudUploadIcon, PauseIcon, ChartIcon, LightbulbIcon, PathArrowIcon];
+
 const cards = [
     {
         id: 1,
@@ -45,6 +101,8 @@ const CARD_COUNT = cards.length;
 const ANGLE_PER_CARD = 360 / CARD_COUNT;
 const FRICTION = 0.94;
 const MIN_VELOCITY = 0.01;
+const AUTO_SPEED = 0.08; // degrees per frame (~0.08 * 60fps ≈ 4.8°/s → one card every ~10.7° / 4.8 ≈ ~3.5s)
+const RESUME_DELAY = 5000; // ms before auto-rotation resumes
 
 const SlowDown = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -53,6 +111,8 @@ const SlowDown = () => {
     const rafRef = useRef<number>(0);
     const isDraggingRef = useRef(false);
     const lastPointerXRef = useRef(0);
+    const lastInteractionRef = useRef(0);
+    const isAutoRef = useRef(true);
     const [rotation, setRotation] = useState(0);
 
     // Focus easing: compress center angles, widen the "focus zone"
@@ -62,14 +122,32 @@ const SlowDown = () => {
         return sign * Math.pow(abs / 180, 0.75) * 180;
     }, []);
 
-    // Animation loop for momentum
+    const markInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        isAutoRef.current = false;
+    }, []);
+
+    // Animation loop: momentum + auto-rotation
     const animate = useCallback(() => {
-        if (!isDraggingRef.current && Math.abs(velocityRef.current) > MIN_VELOCITY) {
-            velocityRef.current *= FRICTION;
-            rotationRef.current += velocityRef.current;
-            setRotation(rotationRef.current);
-        } else if (!isDraggingRef.current) {
-            velocityRef.current = 0;
+        const now = Date.now();
+        const timeSinceInteraction = now - lastInteractionRef.current;
+
+        if (!isDraggingRef.current) {
+            if (Math.abs(velocityRef.current) > MIN_VELOCITY) {
+                // Momentum decay from user interaction
+                velocityRef.current *= FRICTION;
+                rotationRef.current += velocityRef.current;
+                setRotation(rotationRef.current);
+            } else {
+                velocityRef.current = 0;
+
+                // Auto-rotation: resume after inactivity
+                if (timeSinceInteraction > RESUME_DELAY || isAutoRef.current) {
+                    isAutoRef.current = true;
+                    rotationRef.current += AUTO_SPEED;
+                    setRotation(rotationRef.current);
+                }
+            }
         }
         rafRef.current = requestAnimationFrame(animate);
     }, []);
@@ -79,22 +157,31 @@ const SlowDown = () => {
         return () => cancelAnimationFrame(rafRef.current);
     }, [animate]);
 
-    // Wheel handler
+    // Wheel handler — ONLY respond to horizontal scroll (deltaX)
     const handleWheel = useCallback((e: WheelEvent) => {
-        e.preventDefault();
-        const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-        velocityRef.current += delta * 0.015;
-        rotationRef.current += delta * 0.015;
-        setRotation(rotationRef.current);
-    }, []);
+        // If mainly vertical scroll, let the page scroll normally
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) * 1.5) {
+            return; // Don't prevent default — page scrolls vertically
+        }
+
+        // Horizontal scroll detected — rotate the wheel
+        if (Math.abs(e.deltaX) > 2) {
+            e.preventDefault();
+            markInteraction();
+            velocityRef.current += e.deltaX * 0.015;
+            rotationRef.current += e.deltaX * 0.015;
+            setRotation(rotationRef.current);
+        }
+    }, [markInteraction]);
 
     // Pointer handlers for drag
     const handlePointerDown = useCallback((e: React.PointerEvent) => {
         isDraggingRef.current = true;
         lastPointerXRef.current = e.clientX;
         velocityRef.current = 0;
+        markInteraction();
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    }, []);
+    }, [markInteraction]);
 
     const handlePointerMove = useCallback((e: React.PointerEvent) => {
         if (!isDraggingRef.current) return;
@@ -110,7 +197,7 @@ const SlowDown = () => {
         isDraggingRef.current = false;
     }, []);
 
-    // Attach wheel listener with passive: false
+    // Attach wheel listener with passive: false so we can conditionally preventDefault
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
@@ -154,30 +241,38 @@ const SlowDown = () => {
                         const x = RADIUS * Math.sin(rad);
                         const z = RADIUS * Math.cos(rad) - RADIUS;
 
-                        // Scale tiers
+                        // Three depth tiers
                         const absAngle = Math.abs(normalizedAngle);
                         let scale: number;
                         let blur: number;
+                        let opacity: number;
 
                         if (absAngle < 20) {
-                            // Center card
+                            // CENTER: fully visible
                             scale = 1;
                             blur = 0;
+                            opacity = 1;
                         } else if (absAngle < 55) {
-                            // Side cards
+                            // SIDE: reduced
                             const t = (absAngle - 20) / 35;
                             scale = 1 - t * 0.15; // 1 → 0.85
-                            blur = t * 1.5;
+                            blur = t * 2;
+                            opacity = 1 - t * 0.3; // 1 → 0.7
                         } else {
-                            // Back cards
-                            const t = Math.min((absAngle - 55) / 50, 1);
-                            scale = 0.85 - t * 0.15; // 0.85 → 0.7
-                            blur = 1.5 + t * 3;
+                            // BACK: silhouette
+                            const t = Math.min((absAngle - 55) / 60, 1);
+                            scale = 0.85 - t * 0.2; // 0.85 → 0.65
+                            blur = 2 + t * 6; // 2 → 8
+                            opacity = 0.7 - t * 0.45; // 0.7 → 0.25
                         }
 
-                        const opacity = absAngle > 110 ? Math.max(0, 1 - (absAngle - 110) / 30) : 1;
-                        const brightness = absAngle > 40 ? Math.max(0.7, 1 - (absAngle - 40) / 200) : 1;
+                        // Fade out completely past 140°
+                        if (absAngle > 140) {
+                            opacity = Math.max(0, 0.25 * (1 - (absAngle - 140) / 30));
+                        }
+
                         const isVisible = opacity > 0.02;
+                        const IconComponent = cardIcons[index];
 
                         return (
                             <div
@@ -187,7 +282,7 @@ const SlowDown = () => {
                                     transform: `translate(-50%, -50%) translate3d(${x}px, 0px, ${z}px) scale(${scale})`,
                                     zIndex: Math.round((z + RADIUS) * 10),
                                     opacity,
-                                    filter: `blur(${blur}px) brightness(${brightness})`,
+                                    filter: `blur(${blur}px)`,
                                     visibility: isVisible ? 'visible' : 'hidden',
                                     willChange: 'transform, opacity',
                                     pointerEvents: absAngle < 25 ? 'auto' : 'none',
@@ -196,6 +291,9 @@ const SlowDown = () => {
                                 <div className="w-full h-[300px] bg-white/40 backdrop-blur-xl border border-white/40 rounded-3xl p-8 flex flex-col justify-between shadow-xl">
                                     <div className="flex justify-between items-start">
                                         <span className="text-4xl font-light text-[#1a1d21]/15">{String(card.id).padStart(2, '0')}</span>
+                                        <div className="text-[#1a1d21]/25">
+                                            <IconComponent />
+                                        </div>
                                     </div>
                                     <div>
                                         <h3 className="text-xl md:text-2xl font-normal text-[#1a1d21] mb-3">{card.title}</h3>
@@ -209,7 +307,7 @@ const SlowDown = () => {
             </div>
 
             <div className="w-full flex justify-center mt-8 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
-                Scroll or drag to explore
+                Swipe or drag to explore
             </div>
         </section>
     );

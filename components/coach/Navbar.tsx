@@ -4,9 +4,9 @@ import React from 'react';
 
 const Navbar = () => {
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 pointer-events-none py-4 px-4">
+        <nav className="fixed top-0 left-0 right-0 z-50 pointer-events-none pt-6 px-4">
             {/* Floating glass pill container */}
-            <div className="max-w-[1200px] mx-auto bg-white/35 backdrop-blur-xl border border-white/25 rounded-[14px] shadow-lg shadow-black/5 px-6 py-3 flex items-center justify-between pointer-events-auto">
+            <div className="max-w-[1440px] mx-auto bg-white/35 backdrop-blur-xl border border-white/25 rounded-[14px] shadow-lg shadow-black/5 px-8 py-3.5 flex items-center justify-between pointer-events-auto">
                 {/* Logo */}
                 <a href="/" className="font-sans font-bold text-xl tracking-tight text-[#1a1d21]/90 cursor-pointer">
                     Coach Voice

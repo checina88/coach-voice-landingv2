@@ -251,7 +251,7 @@ const Understand = () => {
             </div>
 
             {/* Three-column layout */}
-            <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 items-start">
+            <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 items-center">
 
                 {/* LEFT: Target selection menu */}
                 <div className="md:col-span-3 flex md:flex-col gap-2">
@@ -327,8 +327,8 @@ const Understand = () => {
                     </AnimatePresence>
                 </div>
 
-                {/* RIGHT: Description text */}
-                <div className="md:col-span-4 flex items-center min-h-[200px] md:min-h-[380px]">
+                {/* RIGHT: Description text — vertically centered, text left-aligned */}
+                <div className="md:col-span-4 flex items-center min-h-[200px] md:min-h-[380px] text-left">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTarget}
