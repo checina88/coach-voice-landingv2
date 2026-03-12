@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 
 type TargetId = 'coaches' | 'clubs' | 'federations';
 
@@ -16,6 +15,9 @@ interface ProductCard {
     zIndex: number;
     content: React.ReactNode;
 }
+
+const targetIds: TargetId[] = ['coaches', 'clubs', 'federations'];
+const CYCLE_INTERVAL = 6000;
 
 const targets: { id: TargetId; label: string; description: string; cards: ProductCard[] }[] = [
     {
@@ -239,7 +241,38 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
 
 const Understand = () => {
     const [activeTarget, setActiveTarget] = useState<TargetId>('coaches');
+    const isPausedRef = useRef(false);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
     const currentTarget = targets.find(t => t.id === activeTarget)!;
+
+    // Auto-cycle logic
+    const startCycle = useCallback(() => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => {
+            if (!isPausedRef.current) {
+                setActiveTarget(prev => {
+                    const idx = targetIds.indexOf(prev);
+                    return targetIds[(idx + 1) % targetIds.length];
+                });
+            }
+        }, CYCLE_INTERVAL);
+    }, []);
+
+    useEffect(() => {
+        startCycle();
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, [startCycle]);
+
+    const handleHover = useCallback((id: TargetId) => {
+        isPausedRef.current = true;
+        setActiveTarget(id);
+    }, []);
+
+    const handleHoverEnd = useCallback(() => {
+        isPausedRef.current = false;
+        // Reset the timer so next cycle starts fresh from now
+        startCycle();
+    }, [startCycle]);
 
     return (
         <section className="w-full py-24 px-6 md:px-12 lg:px-24 flex flex-col items-center overflow-hidden">
@@ -255,39 +288,34 @@ const Understand = () => {
 
                 {/* LEFT: Target selection menu */}
                 <div className="md:col-span-3 flex md:flex-col gap-2">
-                    {targets.map(target => (
-                        <button
-                            key={target.id}
-                            onClick={() => setActiveTarget(target.id)}
-                            className={`relative text-left px-4 py-4 rounded-xl transition-all duration-400 group w-full ${
-                                activeTarget === target.id
-                                    ? 'bg-white/30 backdrop-blur-sm text-cv-text-primary'
-                                    : 'text-cv-text-secondary hover:text-cv-text-primary hover:bg-white/10'
-                            }`}
-                        >
-                            <div className="flex items-center justify-between">
-                                <span className="text-base md:text-lg font-medium">{target.label}</span>
-                                <motion.div
-                                    animate={{
-                                        x: activeTarget === target.id ? 0 : -6,
-                                        opacity: activeTarget === target.id ? 1 : 0,
-                                    }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <ArrowRight className="w-4 h-4 text-cv-accent" />
-                                </motion.div>
-                            </div>
-
-                            {/* Animated active bar */}
-                            {activeTarget === target.id && (
-                                <motion.div
-                                    layoutId="targetActiveBar"
-                                    className="absolute left-0 top-2 bottom-2 w-[3px] bg-cv-accent rounded-full"
-                                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                                />
-                            )}
-                        </button>
-                    ))}
+                    {targets.map(target => {
+                        const isActive = activeTarget === target.id;
+                        return (
+                            <button
+                                key={target.id}
+                                onClick={() => { isPausedRef.current = true; setActiveTarget(target.id); }}
+                                onMouseEnter={() => handleHover(target.id)}
+                                onMouseLeave={handleHoverEnd}
+                                className={`relative text-left px-4 py-4 rounded-xl transition-all duration-300 w-full ${
+                                    isActive
+                                        ? 'bg-white/25 backdrop-blur-sm'
+                                        : 'hover:bg-white/10'
+                                }`}
+                                style={{
+                                    transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                                    transformOrigin: 'left center',
+                                }}
+                            >
+                                <span className={`text-base md:text-lg transition-all duration-300 ${
+                                    isActive
+                                        ? 'font-semibold text-cv-text-primary'
+                                        : 'font-normal text-cv-text-secondary'
+                                }`}>
+                                    {target.label}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* CENTER: Floating product cards */}
@@ -332,9 +360,9 @@ const Understand = () => {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTarget}
-                            initial={{ opacity: 0, y: 8 }}
+                            initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
+                            exit={{ opacity: 0, y: -12 }}
                             transition={{ duration: 0.4 }}
                         >
                             <h3 className="text-xl md:text-2xl font-medium text-cv-text-primary mb-4">

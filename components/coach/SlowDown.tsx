@@ -122,19 +122,20 @@ const SlowDown = () => {
         return sign * Math.pow(abs / 180, 0.75) * 180;
     }, []);
 
+    const isHoveringRef = useRef(false);
+
     const markInteraction = useCallback(() => {
         lastInteractionRef.current = Date.now();
         isAutoRef.current = false;
     }, []);
 
-    // Animation loop: momentum + auto-rotation
+    // Animation loop: momentum + auto-rotation (pauses on hover or drag)
     const animate = useCallback(() => {
         const now = Date.now();
         const timeSinceInteraction = now - lastInteractionRef.current;
 
-        if (!isDraggingRef.current) {
+        if (!isDraggingRef.current && !isHoveringRef.current) {
             if (Math.abs(velocityRef.current) > MIN_VELOCITY) {
-                // Momentum decay from user interaction
                 velocityRef.current *= FRICTION;
                 rotationRef.current += velocityRef.current;
                 setRotation(rotationRef.current);
@@ -206,11 +207,11 @@ const SlowDown = () => {
     }, [handleWheel]);
 
     return (
-        <section className="w-full py-32 flex flex-col justify-center overflow-hidden relative">
+        <section className="w-full pt-24 pb-20 flex flex-col justify-center overflow-hidden relative">
             {/* Title Section */}
-            <div className="px-6 md:px-12 lg:px-24 mb-24 text-center relative z-10">
+            <div className="px-6 md:px-12 lg:px-24 mb-10 text-center relative z-10">
                 <div className="max-w-2xl mx-auto fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <h2 className="text-3xl md:text-5xl font-[family-name:var(--font-playfair)] mb-6 text-cv-text-primary tracking-tight">
+                    <h2 className="text-3xl md:text-5xl font-[family-name:var(--font-playfair)] mb-4 text-cv-text-primary tracking-tight">
                         Slow down
                     </h2>
                     <p className="text-xl md:text-2xl text-cv-text-secondary font-light leading-relaxed">
@@ -227,6 +228,8 @@ const SlowDown = () => {
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
+                onMouseEnter={() => { isHoveringRef.current = true; markInteraction(); }}
+                onMouseLeave={() => { isHoveringRef.current = false; }}
             >
                 <div className="relative w-full h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
                     {cards.map((card, index) => {
