@@ -66,7 +66,7 @@ const Hero = () => {
                     >
                         {/* Full-bleed background image */}
                         <Image
-                            src="/hero-reflection.jpg"
+                            src="/hero-reflection.png"
                             alt="Player completing post-session reflection"
                             fill
                             className="object-cover object-center"
