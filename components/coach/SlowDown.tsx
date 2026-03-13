@@ -57,6 +57,7 @@ const PathArrowIcon = () => (
 );
 
 const cardIcons = [CompassIcon, MicrophoneIcon, CloudUploadIcon, PauseIcon, ChartIcon, LightbulbIcon, PathArrowIcon];
+const cardBgColors = ['#F4F8F6', '#E9F2EE', '#EDF5F1', '#E2ECE7', '#F1F7F4', '#E9F2EE', '#F4F8F6'];
 
 const cards = [
     {
@@ -96,7 +97,7 @@ const cards = [
     }
 ];
 
-const RADIUS = 480;
+const RADIUS = 260;
 const CARD_COUNT = cards.length;
 const ANGLE_PER_CARD = 360 / CARD_COUNT;
 const FRICTION = 0.94;
@@ -244,38 +245,41 @@ const SlowDown = () => {
                         const x = RADIUS * Math.sin(rad);
                         const z = RADIUS * Math.cos(rad) - RADIUS;
 
-                        // Three depth tiers
+                        // Three depth tiers — higher opacity for readability
                         const absAngle = Math.abs(normalizedAngle);
                         let scale: number;
                         let blur: number;
                         let opacity: number;
+                        let isCenter = false;
 
-                        if (absAngle < 20) {
-                            // CENTER: fully visible
-                            scale = 1;
+                        if (absAngle < 18) {
+                            // CENTER: elevated, fully visible
+                            scale = 1.05;
                             blur = 0;
                             opacity = 1;
+                            isCenter = true;
                         } else if (absAngle < 55) {
-                            // SIDE: reduced
-                            const t = (absAngle - 20) / 35;
+                            // ADJACENT: high opacity, readable
+                            const t = (absAngle - 18) / 37;
                             scale = 1 - t * 0.15; // 1 → 0.85
-                            blur = t * 2;
-                            opacity = 1 - t * 0.3; // 1 → 0.7
+                            blur = t * 1;
+                            opacity = 0.9 - t * 0.15; // 0.9 → 0.75
                         } else {
-                            // BACK: silhouette
-                            const t = Math.min((absAngle - 55) / 60, 1);
-                            scale = 0.85 - t * 0.2; // 0.85 → 0.65
-                            blur = 2 + t * 6; // 2 → 8
-                            opacity = 0.7 - t * 0.45; // 0.7 → 0.25
+                            // OUTER: still visible
+                            const t = Math.min((absAngle - 55) / 70, 1);
+                            scale = 0.85 - t * 0.15; // 0.85 → 0.7
+                            blur = 1 + t * 3;
+                            opacity = 0.75 - t * 0.35; // 0.75 → 0.4
                         }
 
-                        // Fade out completely past 140°
+                        // Fade out past 140°
                         if (absAngle > 140) {
-                            opacity = Math.max(0, 0.25 * (1 - (absAngle - 140) / 30));
+                            opacity = Math.max(0, 0.4 * (1 - (absAngle - 140) / 30));
                         }
 
                         const isVisible = opacity > 0.02;
                         const IconComponent = cardIcons[index];
+                        const bgColor = cardBgColors[index];
 
                         return (
                             <div
@@ -285,13 +289,21 @@ const SlowDown = () => {
                                     transform: `translate(-50%, -50%) translate3d(${x}px, 0px, ${z}px) scale(${scale})`,
                                     zIndex: Math.round((z + RADIUS) * 10),
                                     opacity,
-                                    filter: `blur(${blur}px)`,
+                                    filter: blur > 0 ? `blur(${blur}px)` : 'none',
                                     visibility: isVisible ? 'visible' : 'hidden',
                                     willChange: 'transform, opacity',
                                     pointerEvents: absAngle < 25 ? 'auto' : 'none',
                                 }}
                             >
-                                <div className="w-full h-[300px] bg-white/40 backdrop-blur-xl border border-white/40 rounded-3xl p-8 flex flex-col justify-between shadow-xl">
+                                <div
+                                    className="w-full h-[300px] backdrop-blur-xl border border-white/50 rounded-3xl p-8 flex flex-col justify-between"
+                                    style={{
+                                        backgroundColor: bgColor,
+                                        boxShadow: isCenter
+                                            ? '0 20px 40px rgba(0,0,0,0.08)'
+                                            : '0 8px 24px rgba(0,0,0,0.04)',
+                                    }}
+                                >
                                     <div className="flex justify-between items-start">
                                         <span className="text-4xl font-light text-[#1a1d21]/15">{String(card.id).padStart(2, '0')}</span>
                                         <div className="text-[#1a1d21]/25">
