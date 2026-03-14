@@ -284,7 +284,7 @@ const Understand = () => {
             </div>
 
             {/* Three-column layout */}
-            <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 items-center">
+            <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-8 items-center px-2">
 
                 {/* LEFT: Target selection menu */}
                 <div className="md:col-span-3 flex md:flex-col gap-2">
@@ -319,7 +319,7 @@ const Understand = () => {
                 </div>
 
                 {/* CENTER: Floating product cards */}
-                <div className="md:col-span-5 relative" style={{ minHeight: '380px' }}>
+                <div className="md:col-span-5 relative" style={{ minHeight: '400px' }}>
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTarget}
@@ -328,7 +328,7 @@ const Understand = () => {
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.35 }}
                             className="relative w-full h-full"
-                            style={{ minHeight: '380px' }}
+                            style={{ minHeight: '400px', transform: 'scale(1.06)', transformOrigin: 'center center' }}
                         >
                             {currentTarget.cards.map((card, i) => (
                                 <motion.div
@@ -356,7 +356,7 @@ const Understand = () => {
                 </div>
 
                 {/* RIGHT: Description text — vertically centered, text left-aligned */}
-                <div className="md:col-span-4 flex items-center min-h-[200px] md:min-h-[380px] text-left">
+                <div className="md:col-span-4 flex items-center min-h-[200px] md:min-h-[400px] text-left md:pl-4">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTarget}
@@ -375,6 +375,11 @@ const Understand = () => {
                     </AnimatePresence>
                 </div>
 
+            </div>
+
+            {/* Helper text */}
+            <div className="w-full flex justify-center mt-14 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
+                Keep exploring
             </div>
         </section>
     );

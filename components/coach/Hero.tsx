@@ -1,18 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import HeroAnimationCard from './HeroAnimationCard';
 import Image from 'next/image';
 
 const STATE_1_DURATION = 10000;
-const STATE_2_DURATION = 6000;
+const STATE_2_DURATION = 10000;
 const CROSSFADE = 0.8;
 
 const Hero = () => {
     const [activeState, setActiveState] = useState<1 | 2>(1);
 
+    // Auto-rotate timer
     useEffect(() => {
         const duration = activeState === 1 ? STATE_1_DURATION : STATE_2_DURATION;
         const timer = setTimeout(() => {
@@ -21,8 +22,22 @@ const Hero = () => {
         return () => clearTimeout(timer);
     }, [activeState]);
 
+    // Notify Navbar of dark/light state (timed to crossfade)
+    useEffect(() => {
+        if (activeState === 2) {
+            const timer = setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('hero-state', { detail: { dark: true } }));
+            }, CROSSFADE * 1000);
+            return () => clearTimeout(timer);
+        } else {
+            window.dispatchEvent(new CustomEvent('hero-state', { detail: { dark: false } }));
+        }
+    }, [activeState]);
+
+    const isDark = activeState === 2;
+
     return (
-        <section className="relative w-full h-screen overflow-hidden">
+        <section id="hero" className="relative w-full h-screen overflow-hidden">
             <AnimatePresence mode="wait">
                 {activeState === 1 ? (
                     /* ── STATE 1: Product Hero ── */
@@ -137,6 +152,54 @@ const Hero = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* ── Timeline indicators ── */}
+            <div className="absolute bottom-8 left-6 md:left-12 lg:left-24 z-20 flex gap-3 items-center">
+                {([1, 2] as const).map(state => (
+                    <button
+                        key={state}
+                        onClick={() => setActiveState(state)}
+                        className="py-2 cursor-pointer"
+                        aria-label={`Go to slide ${state}`}
+                    >
+                        <div className="relative w-8 h-[2px] rounded-full overflow-hidden">
+                            {/* Track */}
+                            <div className={`absolute inset-0 rounded-full transition-colors duration-700 ${
+                                isDark ? 'bg-white/25' : 'bg-cv-text-primary/15'
+                            }`} />
+                            {/* Active fill */}
+                            {activeState === state && (
+                                <motion.div
+                                    key={`fill-${activeState}`}
+                                    className={`absolute inset-0 rounded-full transition-colors duration-700 ${
+                                        isDark ? 'bg-white/80' : 'bg-cv-text-primary/50'
+                                    }`}
+                                    initial={{ scaleX: 0 }}
+                                    animate={{ scaleX: 1 }}
+                                    transition={{
+                                        duration: (state === 1 ? STATE_1_DURATION : STATE_2_DURATION) / 1000,
+                                        ease: 'linear'
+                                    }}
+                                    style={{ transformOrigin: 'left' }}
+                                />
+                            )}
+                        </div>
+                    </button>
+                ))}
+            </div>
+
+            {/* ── Scroll indicator ── */}
+            <motion.button
+                onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                animate={{ y: [0, 6, 0] }}
+                transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
+                className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-10 h-10 rounded-full border flex items-center justify-center transition-colors duration-700 ${
+                    isDark ? 'border-white/30 text-white/50' : 'border-cv-text-primary/20 text-cv-text-primary/40'
+                }`}
+                aria-label="Scroll down"
+            >
+                <ChevronDown className="w-5 h-5" />
+            </motion.button>
         </section>
     );
 };

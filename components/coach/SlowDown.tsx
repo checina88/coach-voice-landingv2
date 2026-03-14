@@ -97,13 +97,13 @@ const cards = [
     }
 ];
 
-const RADIUS = 260;
+const RADIUS = 300;
 const CARD_COUNT = cards.length;
 const ANGLE_PER_CARD = 360 / CARD_COUNT;
 const FRICTION = 0.94;
 const MIN_VELOCITY = 0.01;
-const AUTO_SPEED = 0.08; // degrees per frame (~0.08 * 60fps ≈ 4.8°/s → one card every ~10.7° / 4.8 ≈ ~3.5s)
-const RESUME_DELAY = 5000; // ms before auto-rotation resumes
+const AUTO_SPEED = 0.08;
+const RESUME_DELAY = 400; // ms before auto-rotation resumes after interaction
 
 const SlowDown = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -130,12 +130,9 @@ const SlowDown = () => {
         isAutoRef.current = false;
     }, []);
 
-    // Animation loop: momentum + auto-rotation (pauses on hover or drag)
+    // Animation loop: momentum always runs; auto-rotation pauses on hover/drag
     const animate = useCallback(() => {
-        const now = Date.now();
-        const timeSinceInteraction = now - lastInteractionRef.current;
-
-        if (!isDraggingRef.current && !isHoveringRef.current) {
+        if (!isDraggingRef.current) {
             if (Math.abs(velocityRef.current) > MIN_VELOCITY) {
                 velocityRef.current *= FRICTION;
                 rotationRef.current += velocityRef.current;
@@ -143,8 +140,9 @@ const SlowDown = () => {
             } else {
                 velocityRef.current = 0;
 
-                // Auto-rotation: resume after inactivity
-                if (timeSinceInteraction > RESUME_DELAY || isAutoRef.current) {
+                // Auto-rotation: only when not hovering and after resume delay
+                const timeSinceInteraction = Date.now() - lastInteractionRef.current;
+                if (!isHoveringRef.current && (timeSinceInteraction > RESUME_DELAY || isAutoRef.current)) {
                     isAutoRef.current = true;
                     rotationRef.current += AUTO_SPEED;
                     setRotation(rotationRef.current);
@@ -229,7 +227,7 @@ const SlowDown = () => {
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
-                onMouseEnter={() => { isHoveringRef.current = true; markInteraction(); }}
+                onMouseEnter={() => { isHoveringRef.current = true; }}
                 onMouseLeave={() => { isHoveringRef.current = false; }}
             >
                 <div className="relative w-full h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
@@ -321,7 +319,7 @@ const SlowDown = () => {
                 </div>
             </div>
 
-            <div className="w-full flex justify-center mt-8 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
+            <div className="w-full flex justify-center -mt-2 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
                 Swipe or drag to explore
             </div>
         </section>
