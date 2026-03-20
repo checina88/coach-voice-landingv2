@@ -8,11 +8,6 @@ type TargetId = 'coaches' | 'clubs' | 'federations';
 interface ProductCard {
     id: string;
     title: string;
-    width: string;
-    left: string;
-    top: string;
-    rotate: number;
-    zIndex: number;
     content: React.ReactNode;
 }
 
@@ -23,16 +18,11 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
     {
         id: 'coaches',
         label: 'Coaches',
-        description: 'Understand your communication patterns and how they influence autonomy, competence, and relatedness during training.',
+        description: 'Understand how your communication patterns influence autonomy, competence, and relatedness during training.',
         cards: [
             {
                 id: 'c-sdt',
                 title: 'SDT Score',
-                width: '200px',
-                left: '5%',
-                top: '8%',
-                rotate: -2,
-                zIndex: 3,
                 content: (
                     <div className="space-y-3">
                         <div className="flex items-baseline gap-2">
@@ -53,11 +43,6 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
             {
                 id: 'c-trend',
                 title: 'Session Trend',
-                width: '190px',
-                left: '48%',
-                top: '2%',
-                rotate: 1.5,
-                zIndex: 2,
                 content: (
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
@@ -77,11 +62,6 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
             {
                 id: 'c-feedback',
                 title: 'Communication',
-                width: '210px',
-                left: '25%',
-                top: '50%',
-                rotate: -1,
-                zIndex: 4,
                 content: (
                     <div className="space-y-2.5">
                         {[{ l: 'Directive', r: 'Non-directive', v: 35 }, { l: 'Controlling', r: 'Supportive', v: 72 }, { l: 'Negative', r: 'Positive', v: 80 }].map(d => (
@@ -101,16 +81,11 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
     {
         id: 'clubs',
         label: 'Clubs',
-        description: 'See how coaching behaviors shape the motivational climate across teams and sessions.',
+        description: 'See how coaching behaviors shape development environments across teams, staff, and sessions.',
         cards: [
             {
                 id: 'cl-overview',
                 title: 'Team Overview',
-                width: '220px',
-                left: '10%',
-                top: '5%',
-                rotate: 1,
-                zIndex: 3,
                 content: (
                     <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-2">
@@ -127,11 +102,6 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
             {
                 id: 'cl-alert',
                 title: 'Alert',
-                width: '180px',
-                left: '55%',
-                top: '10%',
-                rotate: -2,
-                zIndex: 2,
                 content: (
                     <div className="space-y-2">
                         <div className="flex items-center gap-1.5">
@@ -147,11 +117,6 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
             {
                 id: 'cl-climate',
                 title: 'Motivational Climate',
-                width: '200px',
-                left: '20%',
-                top: '52%',
-                rotate: 0.5,
-                zIndex: 4,
                 content: (
                     <div className="space-y-2">
                         <div className="flex gap-1 items-end h-10">
@@ -170,16 +135,11 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
     {
         id: 'federations',
         label: 'Federations',
-        description: 'Reveal systemic coaching patterns and support the development of healthier learning environments.',
+        description: 'Build a measurable coaching culture at scale and support more consistent player development systems.',
         cards: [
             {
                 id: 'f-dashboard',
                 title: 'Federation Dashboard',
-                width: '230px',
-                left: '5%',
-                top: '5%',
-                rotate: -1.5,
-                zIndex: 3,
                 content: (
                     <div className="space-y-3">
                         <div className="flex gap-3">
@@ -198,11 +158,6 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
             {
                 id: 'f-dist',
                 title: 'Domain Distribution',
-                width: '190px',
-                left: '50%',
-                top: '8%',
-                rotate: 2,
-                zIndex: 2,
                 content: (
                     <div className="space-y-2">
                         {[{ l: 'Supportive', v: 74 }, { l: 'Autonomy', v: 68 }, { l: 'Questioning', v: 55 }, { l: 'Positive', v: 81 }].map(d => (
@@ -217,11 +172,6 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
             {
                 id: 'f-trend',
                 title: 'National Trend',
-                width: '200px',
-                left: '22%',
-                top: '55%',
-                rotate: -0.5,
-                zIndex: 4,
                 content: (
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
@@ -239,11 +189,64 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
     },
 ];
 
+// Cards on left for even indices, right for odd
+const isCardsLeft = (id: TargetId) => {
+    const idx = targetIds.indexOf(id);
+    return idx % 2 === 0;
+};
+
+const contentVariants = {
+    initial: (direction: number) => ({
+        opacity: 0,
+        x: direction * 60,
+    }),
+    animate: {
+        opacity: 1,
+        x: 0,
+        transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] },
+    },
+    exit: (direction: number) => ({
+        opacity: 0,
+        x: direction * -60,
+        transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] },
+    }),
+};
+
+const cardVariants = {
+    initial: { opacity: 0, y: 16, scale: 0.96 },
+    animate: (i: number) => ({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { delay: i * 0.08, duration: 0.4, ease: 'easeOut' },
+    }),
+};
+
+const textVariants = {
+    initial: { opacity: 0, y: 12 },
+    animate: {
+        opacity: 1,
+        y: 0,
+        transition: { delay: 0.25, duration: 0.4, ease: 'easeOut' },
+    },
+};
+
 const Understand = () => {
     const [activeTarget, setActiveTarget] = useState<TargetId>('coaches');
     const isPausedRef = useRef(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const directionRef = useRef(1);
     const currentTarget = targets.find(t => t.id === activeTarget)!;
+    const cardsLeft = isCardsLeft(activeTarget);
+
+    const changeTarget = useCallback((newTarget: TargetId) => {
+        setActiveTarget(prev => {
+            const prevIdx = targetIds.indexOf(prev);
+            const newIdx = targetIds.indexOf(newTarget);
+            directionRef.current = newIdx >= prevIdx ? 1 : -1;
+            return newTarget;
+        });
+    }, []);
 
     // Auto-cycle logic
     const startCycle = useCallback(() => {
@@ -252,6 +255,7 @@ const Understand = () => {
             if (!isPausedRef.current) {
                 setActiveTarget(prev => {
                     const idx = targetIds.indexOf(prev);
+                    directionRef.current = 1;
                     return targetIds[(idx + 1) % targetIds.length];
                 });
             }
@@ -263,118 +267,106 @@ const Understand = () => {
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
     }, [startCycle]);
 
+    const handleSelect = useCallback((id: TargetId) => {
+        isPausedRef.current = true;
+        changeTarget(id);
+    }, [changeTarget]);
+
     const handleHover = useCallback((id: TargetId) => {
         isPausedRef.current = true;
-        setActiveTarget(id);
-    }, []);
+        changeTarget(id);
+    }, [changeTarget]);
 
     const handleHoverEnd = useCallback(() => {
         isPausedRef.current = false;
-        // Reset the timer so next cycle starts fresh from now
         startCycle();
     }, [startCycle]);
 
     return (
         <section className="w-full py-24 px-6 md:px-12 lg:px-24 flex flex-col items-center overflow-hidden">
             {/* Title */}
-            <div className="max-w-4xl w-full text-center mb-16">
+            <div className="max-w-4xl w-full text-center mb-10">
                 <h2 className="text-3xl md:text-5xl font-[family-name:var(--font-playfair)] text-cv-text-primary tracking-tight">
                     Understand what truly happens.
                 </h2>
             </div>
 
-            {/* Three-column layout */}
-            <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-8 items-center px-2">
+            {/* Selector buttons — centered horizontal pills */}
+            <div className="flex flex-wrap justify-center gap-2 mb-12">
+                {targets.map(target => {
+                    const isActive = activeTarget === target.id;
+                    return (
+                        <button
+                            key={target.id}
+                            onClick={() => handleSelect(target.id)}
+                            onMouseEnter={() => handleHover(target.id)}
+                            onMouseLeave={handleHoverEnd}
+                            className={`px-6 py-2.5 rounded-full text-base transition-all duration-300 cursor-pointer ${
+                                isActive
+                                    ? 'bg-white/25 backdrop-blur-sm font-semibold text-cv-text-primary'
+                                    : 'font-normal text-cv-text-secondary hover:bg-white/10'
+                            }`}
+                            style={{
+                                transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                                transformOrigin: 'center center',
+                            }}
+                        >
+                            {target.label}
+                        </button>
+                    );
+                })}
+            </div>
 
-                {/* LEFT: Target selection menu */}
-                <div className="md:col-span-3 flex md:flex-col gap-2">
-                    {targets.map(target => {
-                        const isActive = activeTarget === target.id;
-                        return (
-                            <button
-                                key={target.id}
-                                onClick={() => { isPausedRef.current = true; setActiveTarget(target.id); }}
-                                onMouseEnter={() => handleHover(target.id)}
-                                onMouseLeave={handleHoverEnd}
-                                className={`relative text-left px-4 py-4 rounded-xl transition-all duration-300 w-full ${
-                                    isActive
-                                        ? 'bg-white/25 backdrop-blur-sm'
-                                        : 'hover:bg-white/10'
-                                }`}
-                                style={{
-                                    transform: isActive ? 'scale(1.05)' : 'scale(1)',
-                                    transformOrigin: 'left center',
-                                }}
+            {/* Content area — alternating cards + text */}
+            <div className="w-full max-w-7xl mx-auto">
+                <AnimatePresence mode="wait" custom={directionRef.current}>
+                    <motion.div
+                        key={activeTarget}
+                        custom={directionRef.current}
+                        variants={contentVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                        className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
+                    >
+                        {/* Cards column */}
+                        <div className={`md:col-span-8 ${cardsLeft ? 'md:order-1' : 'md:order-2'}`}>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                {currentTarget.cards.map((card, i) => (
+                                    <motion.div
+                                        key={card.id}
+                                        custom={i}
+                                        variants={cardVariants}
+                                        initial="initial"
+                                        animate="animate"
+                                        className="bg-white/40 backdrop-blur-sm border border-white/30 rounded-2xl p-5 shadow-md h-full"
+                                    >
+                                        <div className="text-[10px] font-medium text-cv-text-secondary/70 uppercase tracking-wider mb-3">
+                                            {card.title}
+                                        </div>
+                                        {card.content}
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Text column */}
+                        <div className={`md:col-span-4 flex items-center ${cardsLeft ? 'md:order-2' : 'md:order-1'}`}>
+                            <motion.div
+                                variants={textVariants}
+                                initial="initial"
+                                animate="animate"
                             >
-                                <span className={`text-base md:text-lg transition-all duration-300 ${
-                                    isActive
-                                        ? 'font-semibold text-cv-text-primary'
-                                        : 'font-normal text-cv-text-secondary'
-                                }`}>
-                                    {target.label}
-                                </span>
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* CENTER: Floating product cards */}
-                <div className="md:col-span-5 relative" style={{ minHeight: '400px' }}>
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeTarget}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.35 }}
-                            className="relative w-full h-full"
-                            style={{ minHeight: '400px', transform: 'scale(1.06)', transformOrigin: 'center center' }}
-                        >
-                            {currentTarget.cards.map((card, i) => (
-                                <motion.div
-                                    key={card.id}
-                                    initial={{ opacity: 0, y: 16, scale: 0.96 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    transition={{ delay: i * 0.1, duration: 0.5, ease: 'easeOut' }}
-                                    className="absolute bg-white/50 backdrop-blur-md rounded-2xl border border-white/40 shadow-lg p-4"
-                                    style={{
-                                        width: card.width,
-                                        left: card.left,
-                                        top: card.top,
-                                        transform: `rotate(${card.rotate}deg)`,
-                                        zIndex: card.zIndex,
-                                    }}
-                                >
-                                    <div className="text-[10px] font-medium text-cv-text-secondary/70 uppercase tracking-wider mb-2">
-                                        {card.title}
-                                    </div>
-                                    {card.content}
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-
-                {/* RIGHT: Description text — vertically centered, text left-aligned */}
-                <div className="md:col-span-4 flex items-center min-h-[200px] md:min-h-[400px] text-left md:pl-4">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeTarget}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -12 }}
-                            transition={{ duration: 0.4 }}
-                        >
-                            <h3 className="text-xl md:text-2xl font-medium text-cv-text-primary mb-4">
-                                {currentTarget.label}
-                            </h3>
-                            <p className="text-base md:text-lg font-light text-cv-text-secondary leading-relaxed">
-                                {currentTarget.description}
-                            </p>
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-
+                                <h3 className="text-xl md:text-2xl font-medium text-cv-text-primary mb-4">
+                                    {currentTarget.label}
+                                </h3>
+                                <p className="text-base md:text-lg font-light text-cv-text-secondary leading-relaxed">
+                                    {currentTarget.description}
+                                </p>
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
             </div>
 
             {/* Helper text */}
