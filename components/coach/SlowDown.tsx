@@ -100,10 +100,9 @@ const cards = [
 const RADIUS = 300;
 const CARD_COUNT = cards.length;
 const ANGLE_PER_CARD = 360 / CARD_COUNT;
-const FRICTION = 0.94;
+const FRICTION = 0.92;
 const MIN_VELOCITY = 0.01;
-const AUTO_SPEED = 0.08;
-const RESUME_DELAY = 400; // ms before auto-rotation resumes after interaction
+const AUTO_SPEED = 0.06;
 
 const SlowDown = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -112,43 +111,22 @@ const SlowDown = () => {
     const rafRef = useRef<number>(0);
     const isDraggingRef = useRef(false);
     const lastPointerXRef = useRef(0);
-    const lastInteractionRef = useRef(0);
-    const isAutoRef = useRef(true);
     const [rotation, setRotation] = useState(0);
 
-    // Focus easing: compress center angles, widen the "focus zone"
-    const focusEase = useCallback((angle: number): number => {
-        const sign = Math.sign(angle);
-        const abs = Math.abs(angle);
-        return sign * Math.pow(abs / 180, 0.75) * 180;
-    }, []);
-
-    const isHoveringRef = useRef(false);
-
-    const markInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        isAutoRef.current = false;
-    }, []);
-
-    // Animation loop: momentum always runs; auto-rotation pauses on hover/drag
+    // Animation loop: base rotation ALWAYS runs, user momentum decays on top
     const animate = useCallback(() => {
-        if (!isDraggingRef.current) {
-            if (Math.abs(velocityRef.current) > MIN_VELOCITY) {
-                velocityRef.current *= FRICTION;
-                rotationRef.current += velocityRef.current;
-                setRotation(rotationRef.current);
-            } else {
-                velocityRef.current = 0;
+        // Base auto-rotation — constant, never stops
+        rotationRef.current += AUTO_SPEED;
 
-                // Auto-rotation: only when not hovering and after resume delay
-                const timeSinceInteraction = Date.now() - lastInteractionRef.current;
-                if (!isHoveringRef.current && (timeSinceInteraction > RESUME_DELAY || isAutoRef.current)) {
-                    isAutoRef.current = true;
-                    rotationRef.current += AUTO_SPEED;
-                    setRotation(rotationRef.current);
-                }
-            }
+        // Decay user momentum when not dragging
+        if (!isDraggingRef.current && Math.abs(velocityRef.current) > MIN_VELOCITY) {
+            velocityRef.current *= FRICTION;
+            rotationRef.current += velocityRef.current;
+        } else if (!isDraggingRef.current) {
+            velocityRef.current = 0;
         }
+
+        setRotation(rotationRef.current);
         rafRef.current = requestAnimationFrame(animate);
     }, []);
 
@@ -159,29 +137,22 @@ const SlowDown = () => {
 
     // Wheel handler — ONLY respond to horizontal scroll (deltaX)
     const handleWheel = useCallback((e: WheelEvent) => {
-        // If mainly vertical scroll, let the page scroll normally
-        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) * 1.5) {
-            return; // Don't prevent default — page scrolls vertically
-        }
-
-        // Horizontal scroll detected — rotate the wheel
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) * 1.5) return;
         if (Math.abs(e.deltaX) > 2) {
             e.preventDefault();
-            markInteraction();
             velocityRef.current += e.deltaX * 0.015;
             rotationRef.current += e.deltaX * 0.015;
             setRotation(rotationRef.current);
         }
-    }, [markInteraction]);
+    }, []);
 
     // Pointer handlers for drag
     const handlePointerDown = useCallback((e: React.PointerEvent) => {
         isDraggingRef.current = true;
         lastPointerXRef.current = e.clientX;
         velocityRef.current = 0;
-        markInteraction();
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    }, [markInteraction]);
+    }, []);
 
     const handlePointerMove = useCallback((e: React.PointerEvent) => {
         if (!isDraggingRef.current) return;
@@ -206,9 +177,9 @@ const SlowDown = () => {
     }, [handleWheel]);
 
     return (
-        <section className="w-full pt-24 pb-20 flex flex-col justify-center overflow-hidden relative">
-            {/* Title Section */}
-            <div className="px-6 md:px-12 lg:px-24 mb-10 text-center relative z-10">
+        <section className="w-full pt-16 pb-12 flex flex-col justify-center overflow-hidden relative">
+            {/* Title Section — tighter spacing */}
+            <div className="px-6 md:px-12 lg:px-24 mb-6 text-center relative z-10">
                 <div className="max-w-2xl mx-auto fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <h2 className="text-3xl md:text-5xl font-[family-name:var(--font-playfair)] mb-4 text-cv-text-primary tracking-tight">
                         Slow down
@@ -219,16 +190,14 @@ const SlowDown = () => {
                 </div>
             </div>
 
-            {/* 3D Wheel Container */}
+            {/* 3D Wheel Container — reduced height */}
             <div
                 ref={containerRef}
-                className="relative w-full h-[500px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                className="relative w-full h-[400px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
-                onMouseEnter={() => { isHoveringRef.current = true; }}
-                onMouseLeave={() => { isHoveringRef.current = false; }}
             >
                 <div className="relative w-full h-full flex items-center justify-center" style={{ perspective: '2000px' }}>
                     {cards.map((card, index) => {
@@ -236,44 +205,28 @@ const SlowDown = () => {
                         const rawAngle = cardAngleOffset - rotation;
                         const normalizedAngle = ((rawAngle % 360) + 540) % 360 - 180;
 
-                        // Apply focus easing
-                        const easedAngle = focusEase(normalizedAngle);
-
-                        const rad = (easedAngle * Math.PI) / 180;
+                        // Direct angle → position (no focus easing = constant linear speed)
+                        const rad = (normalizedAngle * Math.PI) / 180;
                         const x = RADIUS * Math.sin(rad);
                         const z = RADIUS * Math.cos(rad) - RADIUS;
 
-                        // Three depth tiers — higher opacity for readability
+                        // ── Continuous interpolation — NO discrete tiers ──
                         const absAngle = Math.abs(normalizedAngle);
-                        let scale: number;
-                        let blur: number;
-                        let opacity: number;
-                        let isCenter = false;
+                        const t = absAngle / 180; // 0 at front, 1 at back
 
-                        if (absAngle < 18) {
-                            // CENTER: elevated, fully visible
-                            scale = 1.05;
-                            blur = 0;
-                            opacity = 1;
-                            isCenter = true;
-                        } else if (absAngle < 55) {
-                            // ADJACENT: high opacity, readable
-                            const t = (absAngle - 18) / 37;
-                            scale = 1 - t * 0.15; // 1 → 0.85
-                            blur = t * 1;
-                            opacity = 0.9 - t * 0.15; // 0.9 → 0.75
-                        } else {
-                            // OUTER: still visible
-                            const t = Math.min((absAngle - 55) / 70, 1);
-                            scale = 0.85 - t * 0.15; // 0.85 → 0.7
-                            blur = 1 + t * 3;
-                            opacity = 0.75 - t * 0.35; // 0.75 → 0.4
-                        }
+                        // Smooth scale: 1.04 (center) → 0.70 (back)
+                        const scale = 1.04 - 0.34 * t;
 
-                        // Fade out past 140°
-                        if (absAngle > 140) {
-                            opacity = Math.max(0, 0.4 * (1 - (absAngle - 140) / 30));
-                        }
+                        // Smooth opacity: cosine falloff for natural feel
+                        const opacity = Math.max(0, (1 + Math.cos(t * Math.PI)) / 2);
+
+                        // Smooth blur: linear increase
+                        const blur = t * 5;
+
+                        // Continuous shadow depth
+                        const shadowSpread = 8 + (1 - t) * 12;
+                        const shadowBlur = 24 + (1 - t) * 16;
+                        const shadowAlpha = 0.03 + (1 - t) * 0.05;
 
                         const isVisible = opacity > 0.02;
                         const IconComponent = cardIcons[index];
@@ -287,7 +240,7 @@ const SlowDown = () => {
                                     transform: `translate(-50%, -50%) translate3d(${x}px, 0px, ${z}px) scale(${scale})`,
                                     zIndex: Math.round((z + RADIUS) * 10),
                                     opacity,
-                                    filter: blur > 0 ? `blur(${blur}px)` : 'none',
+                                    filter: blur > 0.2 ? `blur(${blur}px)` : 'none',
                                     visibility: isVisible ? 'visible' : 'hidden',
                                     willChange: 'transform, opacity',
                                     pointerEvents: absAngle < 25 ? 'auto' : 'none',
@@ -297,9 +250,7 @@ const SlowDown = () => {
                                     className="w-full h-[300px] backdrop-blur-xl border border-white/50 rounded-3xl p-8 flex flex-col justify-between"
                                     style={{
                                         backgroundColor: bgColor,
-                                        boxShadow: isCenter
-                                            ? '0 20px 40px rgba(0,0,0,0.08)'
-                                            : '0 8px 24px rgba(0,0,0,0.04)',
+                                        boxShadow: `0 ${shadowSpread}px ${shadowBlur}px rgba(0,0,0,${shadowAlpha})`,
                                     }}
                                 >
                                     <div className="flex justify-between items-start">
@@ -319,7 +270,8 @@ const SlowDown = () => {
                 </div>
             </div>
 
-            <div className="w-full flex justify-center -mt-2 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
+            {/* Helper text — always visible */}
+            <div className="w-full flex justify-center mt-2 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
                 Swipe or drag to explore
             </div>
         </section>

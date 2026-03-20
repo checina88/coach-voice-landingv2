@@ -14,6 +14,9 @@ interface ProductCard {
 const targetIds: TargetId[] = ['coaches', 'clubs', 'federations'];
 const CYCLE_INTERVAL = 6000;
 
+/* ── Fixed card height for uniform sizing ── */
+const CARD_HEIGHT = 230;
+
 const targets: { id: TargetId; label: string; description: string; cards: ProductCard[] }[] = [
     {
         id: 'coaches',
@@ -24,16 +27,16 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'c-sdt',
                 title: 'SDT Score',
                 content: (
-                    <div className="space-y-3">
+                    <div className="space-y-4 flex-1 flex flex-col justify-center">
                         <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-light text-cv-text-primary">78</span>
-                            <span className="text-xs text-cv-accent">+4.2%</span>
+                            <span className="text-4xl font-light text-cv-text-primary">78</span>
+                            <span className="text-xs text-cv-accent font-medium">+4.2%</span>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             {[{ l: 'Autonomy', v: 82 }, { l: 'Competence', v: 75 }, { l: 'Relatedness', v: 77 }].map(m => (
                                 <div key={m.l} className="space-y-1">
-                                    <div className="flex justify-between text-[10px] text-cv-text-secondary"><span>{m.l}</span><span>{m.v}</span></div>
-                                    <div className="h-1 bg-cv-text-primary/10 rounded-full"><div className="h-full bg-cv-accent/60 rounded-full" style={{ width: `${m.v}%` }} /></div>
+                                    <div className="flex justify-between text-[11px] text-cv-text-secondary"><span>{m.l}</span><span>{m.v}</span></div>
+                                    <div className="h-1.5 bg-cv-text-primary/10 rounded-full"><div className="h-full bg-cv-accent/60 rounded-full" style={{ width: `${m.v}%` }} /></div>
                                 </div>
                             ))}
                         </div>
@@ -44,15 +47,15 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'c-trend',
                 title: 'Session Trend',
                 content: (
-                    <div className="space-y-2">
+                    <div className="space-y-3 flex-1 flex flex-col justify-center">
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-cv-accent font-medium">Last 8 sessions</span>
                         </div>
-                        <svg viewBox="0 0 160 50" className="w-full h-12">
-                            <polyline fill="none" stroke="#3f857e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,40 20,35 40,38 60,28 80,30 100,22 120,18 140,15 160,12" />
-                            <polyline fill="none" stroke="#3f857e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.3" points="0,30 20,32 40,28 60,34 80,25 100,28 120,22 140,20 160,18" />
+                        <svg viewBox="0 0 160 60" className="w-full h-20">
+                            <polyline fill="none" stroke="#3f857e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,50 20,44 40,47 60,35 80,37 100,28 120,22 140,18 160,14" />
+                            <polyline fill="none" stroke="#3f857e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.3" points="0,38 20,40 40,35 60,42 80,32 100,35 120,28 140,25 160,22" />
                         </svg>
-                        <div className="flex justify-between text-[10px] text-cv-text-secondary">
+                        <div className="flex justify-between text-[11px] text-cv-text-secondary">
                             <span>Week 1</span>
                             <span>Week 8</span>
                         </div>
@@ -63,14 +66,14 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'c-feedback',
                 title: 'Communication',
                 content: (
-                    <div className="space-y-2.5">
+                    <div className="space-y-4 flex-1 flex flex-col justify-center">
                         {[{ l: 'Directive', r: 'Non-directive', v: 35 }, { l: 'Controlling', r: 'Supportive', v: 72 }, { l: 'Negative', r: 'Positive', v: 80 }].map(d => (
-                            <div key={d.l} className="flex items-center gap-1.5">
-                                <span className="text-[9px] text-cv-text-secondary w-16 text-right truncate">{d.l}</span>
-                                <div className="flex-1 h-1 bg-cv-text-primary/10 rounded-full relative">
-                                    <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-cv-accent" style={{ left: `${d.v}%`, transform: `translateX(-50%) translateY(-50%)` }} />
+                            <div key={d.l} className="flex items-center gap-2">
+                                <span className="text-[10px] text-cv-text-secondary w-16 text-right truncate">{d.l}</span>
+                                <div className="flex-1 h-1.5 bg-cv-text-primary/10 rounded-full relative">
+                                    <div className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-cv-accent" style={{ left: `${d.v}%`, transform: `translateX(-50%) translateY(-50%)` }} />
                                 </div>
-                                <span className="text-[9px] text-cv-text-secondary w-16 truncate">{d.r}</span>
+                                <span className="text-[10px] text-cv-text-secondary w-16 truncate">{d.r}</span>
                             </div>
                         ))}
                     </div>
@@ -87,12 +90,12 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'cl-overview',
                 title: 'Team Overview',
                 content: (
-                    <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-3 flex-1 flex flex-col justify-center">
+                        <div className="grid grid-cols-2 gap-3">
                             {[{ l: 'U-14', v: '82', c: 'text-cv-accent' }, { l: 'U-16', v: '74', c: 'text-cv-text-secondary' }, { l: 'U-18', v: '88', c: 'text-cv-accent' }, { l: 'Senior', v: '71', c: 'text-cv-text-secondary' }].map(t => (
-                                <div key={t.l} className="bg-white/30 rounded-lg p-2 text-center">
-                                    <div className={`text-lg font-light ${t.c}`}>{t.v}</div>
-                                    <div className="text-[9px] text-cv-text-secondary">{t.l}</div>
+                                <div key={t.l} className="bg-white/30 rounded-lg p-3 text-center">
+                                    <div className={`text-xl font-light ${t.c}`}>{t.v}</div>
+                                    <div className="text-[10px] text-cv-text-secondary mt-0.5">{t.l}</div>
                                 </div>
                             ))}
                         </div>
@@ -103,14 +106,18 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'cl-alert',
                 title: 'Alert',
                 content: (
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                            <span className="text-[10px] font-medium text-amber-600">Attention needed</span>
+                    <div className="space-y-3 flex-1 flex flex-col justify-center">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-amber-400" />
+                            <span className="text-xs font-medium text-amber-600">Attention needed</span>
                         </div>
-                        <p className="text-[11px] text-cv-text-secondary leading-relaxed">
+                        <p className="text-sm text-cv-text-secondary leading-relaxed">
                             U-16 coach shows declining supportive communication over 3 consecutive sessions.
                         </p>
+                        <div className="flex gap-2 mt-1">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">U-16</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cv-accent/10 text-cv-accent">Communication</span>
+                        </div>
                     </div>
                 ),
             },
@@ -118,14 +125,14 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'cl-climate',
                 title: 'Motivational Climate',
                 content: (
-                    <div className="space-y-2">
-                        <div className="flex gap-1 items-end h-10">
+                    <div className="space-y-3 flex-1 flex flex-col justify-center">
+                        <div className="flex gap-1.5 items-end h-20">
                             {[65, 72, 58, 80, 74, 68, 85, 78].map((v, i) => (
-                                <div key={i} className="flex-1 bg-cv-accent/40 rounded-t" style={{ height: `${v}%` }} />
+                                <div key={i} className="flex-1 bg-cv-accent/40 rounded-t transition-all" style={{ height: `${v}%` }} />
                             ))}
                         </div>
-                        <div className="flex justify-between text-[9px] text-cv-text-secondary">
-                            <span>Jan</span><span>Aug</span>
+                        <div className="flex justify-between text-[10px] text-cv-text-secondary">
+                            <span>Jan</span><span>Apr</span><span>Aug</span>
                         </div>
                     </div>
                 ),
@@ -141,17 +148,17 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'f-dashboard',
                 title: 'Federation Dashboard',
                 content: (
-                    <div className="space-y-3">
-                        <div className="flex gap-3">
+                    <div className="space-y-4 flex-1 flex flex-col justify-center">
+                        <div className="flex gap-4">
                             {[{ l: 'Coaches', v: '248' }, { l: 'Sessions', v: '1.2k' }, { l: 'Avg SDT', v: '76' }].map(s => (
                                 <div key={s.l} className="flex-1 text-center">
-                                    <div className="text-lg font-light text-cv-text-primary">{s.v}</div>
-                                    <div className="text-[9px] text-cv-text-secondary">{s.l}</div>
+                                    <div className="text-xl font-light text-cv-text-primary">{s.v}</div>
+                                    <div className="text-[10px] text-cv-text-secondary mt-0.5">{s.l}</div>
                                 </div>
                             ))}
                         </div>
                         <div className="h-px bg-cv-text-primary/10" />
-                        <div className="text-[10px] text-cv-accent">12 regions monitored</div>
+                        <div className="text-xs text-cv-accent font-medium">12 regions monitored</div>
                     </div>
                 ),
             },
@@ -159,11 +166,11 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'f-dist',
                 title: 'Domain Distribution',
                 content: (
-                    <div className="space-y-2">
+                    <div className="space-y-3 flex-1 flex flex-col justify-center">
                         {[{ l: 'Supportive', v: 74 }, { l: 'Autonomy', v: 68 }, { l: 'Questioning', v: 55 }, { l: 'Positive', v: 81 }].map(d => (
-                            <div key={d.l} className="space-y-0.5">
-                                <div className="flex justify-between text-[9px] text-cv-text-secondary"><span>{d.l}</span><span>{d.v}%</span></div>
-                                <div className="h-1 bg-cv-text-primary/10 rounded-full"><div className="h-full bg-cv-accent/50 rounded-full" style={{ width: `${d.v}%` }} /></div>
+                            <div key={d.l} className="space-y-1">
+                                <div className="flex justify-between text-[10px] text-cv-text-secondary"><span>{d.l}</span><span>{d.v}%</span></div>
+                                <div className="h-1.5 bg-cv-text-primary/10 rounded-full"><div className="h-full bg-cv-accent/50 rounded-full" style={{ width: `${d.v}%` }} /></div>
                             </div>
                         ))}
                     </div>
@@ -173,15 +180,18 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
                 id: 'f-trend',
                 title: 'National Trend',
                 content: (
-                    <div className="space-y-2">
+                    <div className="space-y-3 flex-1 flex flex-col justify-center">
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-cv-accent font-medium">Year over year</span>
-                            <span className="text-[10px] text-cv-accent/70">+8.3%</span>
+                            <span className="text-[11px] text-cv-accent/70">+8.3%</span>
                         </div>
-                        <svg viewBox="0 0 160 40" className="w-full h-10">
-                            <polyline fill="none" stroke="#3f857e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 2" points="0,35 40,30 80,28 120,22 160,20" />
-                            <polyline fill="none" stroke="#3f857e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,32 40,26 80,20 120,15 160,10" />
+                        <svg viewBox="0 0 160 50" className="w-full h-16">
+                            <polyline fill="none" stroke="#3f857e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 2" points="0,42 40,36 80,33 120,26 160,24" />
+                            <polyline fill="none" stroke="#3f857e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,38 40,30 80,23 120,16 160,10" />
                         </svg>
+                        <div className="flex justify-between text-[10px] text-cv-text-secondary">
+                            <span>2023</span><span>2024</span><span>2025</span>
+                        </div>
                     </div>
                 ),
             },
@@ -189,7 +199,7 @@ const targets: { id: TargetId; label: string; description: string; cards: Produc
     },
 ];
 
-// Cards on left for even indices, right for odd
+// Cards on left for even indices (coaches, federations), right for odd (clubs)
 const isCardsLeft = (id: TargetId) => {
     const idx = targetIds.indexOf(id);
     return idx % 2 === 0;
@@ -283,9 +293,9 @@ const Understand = () => {
     }, [startCycle]);
 
     return (
-        <section className="w-full py-24 px-6 md:px-12 lg:px-24 flex flex-col items-center overflow-hidden">
-            {/* Title */}
-            <div className="max-w-4xl w-full text-center mb-10">
+        <section className="w-full py-20 px-6 md:px-12 lg:px-24 flex flex-col items-center overflow-hidden">
+            {/* Title — slightly higher */}
+            <div className="max-w-4xl w-full text-center mb-8">
                 <h2 className="text-3xl md:text-5xl font-[family-name:var(--font-playfair)] text-cv-text-primary tracking-tight">
                     Understand what truly happens.
                 </h2>
@@ -317,8 +327,8 @@ const Understand = () => {
                 })}
             </div>
 
-            {/* Content area — alternating cards + text */}
-            <div className="w-full max-w-7xl mx-auto">
+            {/* Content area — fixed min-height prevents layout shift */}
+            <div className="w-full max-w-7xl mx-auto" style={{ minHeight: `${CARD_HEIGHT + 40}px` }}>
                 <AnimatePresence mode="wait" custom={directionRef.current}>
                     <motion.div
                         key={activeTarget}
@@ -329,7 +339,7 @@ const Understand = () => {
                         exit="exit"
                         className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center"
                     >
-                        {/* Cards column */}
+                        {/* Cards column — 2/3 */}
                         <div className={`md:col-span-8 ${cardsLeft ? 'md:order-1' : 'md:order-2'}`}>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 {currentTarget.cards.map((card, i) => (
@@ -339,18 +349,21 @@ const Understand = () => {
                                         variants={cardVariants}
                                         initial="initial"
                                         animate="animate"
-                                        className="bg-white/40 backdrop-blur-sm border border-white/30 rounded-2xl p-5 shadow-md h-full"
+                                        className="bg-white/40 backdrop-blur-sm border border-white/30 rounded-2xl p-6 shadow-lg flex flex-col"
+                                        style={{ height: `${CARD_HEIGHT}px` }}
                                     >
-                                        <div className="text-[10px] font-medium text-cv-text-secondary/70 uppercase tracking-wider mb-3">
+                                        <div className="text-[11px] font-medium text-cv-text-secondary/70 uppercase tracking-wider mb-3">
                                             {card.title}
                                         </div>
-                                        {card.content}
+                                        <div className="flex-1 flex flex-col">
+                                            {card.content}
+                                        </div>
                                     </motion.div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Text column */}
+                        {/* Text column — 1/3 */}
                         <div className={`md:col-span-4 flex items-center ${cardsLeft ? 'md:order-2' : 'md:order-1'}`}>
                             <motion.div
                                 variants={textVariants}
@@ -369,8 +382,8 @@ const Understand = () => {
                 </AnimatePresence>
             </div>
 
-            {/* Helper text */}
-            <div className="w-full flex justify-center mt-14 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
+            {/* Helper text — fixed position, stable anchor */}
+            <div className="w-full flex justify-center mt-16 text-[#1a1d21]/30 text-sm font-light tracking-widest uppercase">
                 Keep exploring
             </div>
         </section>
