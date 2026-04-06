@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { isPersonalEmail, isValidEmail } from '@/lib/blocked-domains';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+    return new Resend(process.env.RESEND_API_KEY);
+}
 
 const FROM_EMAIL = 'Coach Voice <hello@coachvoice.ai>';
 const TEAM_EMAIL = 'hello@coachvoice.ai';
@@ -140,6 +142,8 @@ export async function POST(request: Request) {
         }
 
         const data: BookingRequest = { firstName, lastName, email, company, phone, jobTitle, message, packageType };
+
+        const resend = getResend();
 
         // Send both emails in parallel
         const [notifResult, replyResult] = await Promise.allSettled([
