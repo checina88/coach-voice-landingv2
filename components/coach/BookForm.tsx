@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Check, Loader2 } from 'lucide-react';
+import { isPersonalEmail, isValidEmail } from '@/lib/blocked-domains';
 
 const BookForm = () => {
     const [formData, setFormData] = useState({
@@ -12,7 +13,7 @@ const BookForm = () => {
         phone: '',
         jobTitle: '',
         message: '',
-        packageType: '', // 'independent' | 'enterprise'
+        packageType: '',
         consentInfo: false,
         consentTerms: false
     });
@@ -20,6 +21,7 @@ const BookForm = () => {
     const [touched, setTouched] = useState<Record<string, boolean>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [serverError, setServerError] = useState('');
 
     const handleBlur = (field: string) => {
         setTouched(prev => ({ ...prev, [field]: true }));
@@ -27,21 +29,19 @@ const BookForm = () => {
 
     const handleChange = (field: string, value: string | boolean) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        // Clear touched state if user is typing to remove error immediately? 
-        // Or keep error until fixed? Let's keep error until valid usually, but for simple UX, just update value.
+        if (serverError) setServerError('');
     };
+
+    const emailIsPersonal = formData.email.includes('@') && isPersonalEmail(formData.email);
 
     const isFieldInvalid = (field: string) => {
         if (!touched[field]) return false;
-
         switch (field) {
             case 'firstName': return !formData.firstName.trim();
             case 'lastName': return !formData.lastName.trim();
-            case 'email': return !/\S+@\S+\.\S+/.test(formData.email);
+            case 'email': return !isValidEmail(formData.email) || emailIsPersonal;
             case 'company': return !formData.company.trim();
             case 'packageType': return !formData.packageType;
-            case 'consentInfo': return false; // Not strictly required by logic usually but user requested "Both required to submit"? Wait, user said "Both required to submit".
-            // "Checkboxes (both required to submit)"
             case 'consents': return !formData.consentInfo || !formData.consentTerms;
             default: return false;
         }
@@ -51,7 +51,8 @@ const BookForm = () => {
         return (
             formData.firstName.trim() &&
             formData.lastName.trim() &&
-            /\S+@\S+\.\S+/.test(formData.email) &&
+            isValidEmail(formData.email) &&
+            !isPersonalEmail(formData.email) &&
             formData.company.trim() &&
             formData.packageType &&
             formData.consentInfo &&
@@ -61,8 +62,8 @@ const BookForm = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setServerError('');
 
-        // Touch all fields to show errors if incomplete
         setTouched({
             firstName: true,
             lastName: true,
@@ -76,10 +77,28 @@ const BookForm = () => {
         if (!isValid()) return;
 
         setIsSubmitting(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setIsSubmitting(false);
-        setIsSubmitted(true);
+
+        try {
+            const res = await fetch('/api/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setServerError(data.error || 'Something went wrong. Please try again.');
+                setIsSubmitting(false);
+                return;
+            }
+
+            setIsSubmitting(false);
+            setIsSubmitted(true);
+        } catch {
+            setServerError('Connection error. Please try again.');
+            setIsSubmitting(false);
+        }
     };
 
     if (isSubmitted) {
@@ -90,7 +109,7 @@ const BookForm = () => {
                 </div>
                 <h3 className="text-2xl text-[#1a1d21] font-light mb-4">Thank you.</h3>
                 <p className="text-[#475569] font-light text-lg">
-                    We’ll be in touch shortly to schedule your conversation.
+                    We&apos;ll be in touch within 48 hours to schedule your conversation.
                 </p>
             </div>
         );
@@ -143,7 +162,14 @@ const BookForm = () => {
                                 onChange={e => handleChange('email', e.target.value)}
                                 onBlur={() => handleBlur('email')}
                             />
-                            {isFieldInvalid('email') && <span className="text-xs text-red-400 pl-1">Invalid email</span>}
+                            {touched.email && !isValidEmail(formData.email) && formData.email.length > 0 && (
+                                <span className="text-xs text-red-400 pl-1">Invalid email</span>
+                            )}
+                            {emailIsPersonal && (
+                                <p className="text-xs text-amber-600 pl-1 leading-relaxed">
+                                    Coach Voice is designed for sports organizations. Please use your club or organization email to get started.
+                                </p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-[#1a1d21]/70">Company name *</label>
@@ -257,11 +283,18 @@ const BookForm = () => {
                         </div>
                     </div>
 
+                    {/* Server Error */}
+                    {serverError && (
+                        <div className="text-sm text-red-500 bg-red-50 rounded-xl p-4">
+                            {serverError}
+                        </div>
+                    )}
+
                     {/* Submit Button */}
                     <div className="pt-4">
                         <button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || emailIsPersonal}
                             className={`w-full py-4 rounded-xl text-white font-medium transition-all duration-300 flex items-center justify-center gap-2
                                 ${isValid() ? 'bg-[#3f857e] hover:bg-[#2d6660] shadow-lg shadow-[#3f857e]/20' : 'bg-gray-300 cursor-not-allowed'}
                             `}
@@ -280,7 +313,7 @@ const BookForm = () => {
                     {/* Security Notice */}
                     <div className="text-center text-[10px] text-[#475569]/40">
                         Protected by reCAPTCHA<br />
-                        Privacy • Terms
+                        Privacy &bull; Terms
                     </div>
                 </form>
             </div>

@@ -52,7 +52,7 @@ const Navbar = () => {
                     <a href="#" className={`transition-colors duration-200 ${isDark ? 'hover:text-white' : 'hover:text-[#1a1d21]'}`}>Customers</a>
                     <a href="#" className={`transition-colors duration-200 ${isDark ? 'hover:text-white' : 'hover:text-[#1a1d21]'}`}>Pricing</a>
 
-                    <a href="/book" className={`px-5 py-2 rounded-full border transition-all duration-500 text-sm font-semibold ${
+                    <a href="/take-action" className={`px-5 py-2 rounded-full border transition-all duration-500 text-sm font-semibold ${
                         isDark
                             ? 'border-white/30 text-white hover:bg-white/15'
                             : 'border-[#3f857e]/30 text-[#3f857e] hover:bg-[#3f857e] hover:text-white'
